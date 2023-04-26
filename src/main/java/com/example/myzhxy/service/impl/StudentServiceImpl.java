@@ -6,12 +6,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.myzhxy.mapper.StudentMapper;
 import com.example.myzhxy.pojo.LoginForm;
+import com.example.myzhxy.pojo.Notificationpub;
 import com.example.myzhxy.pojo.Student;
 import com.example.myzhxy.service.StudentService;
 import com.example.myzhxy.utils.MD5;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * @Author hongxiaobin
@@ -43,6 +46,13 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
     }
 
     @Override
+    public Student getStudentByName(String name) {
+        QueryWrapper<Student> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("name", name);
+        return baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public IPage<Student> getStudentByOpr(Student student, Page<Student> studentPage) {
         QueryWrapper<Student> studentQueryWrapper = new QueryWrapper<>();
         String clazzName = student.getClazzName();
@@ -63,5 +73,12 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         QueryWrapper<Student> studentQueryWrapper = new QueryWrapper<>();
         studentQueryWrapper.eq("id", userId.intValue()).eq("password", oldPwd);
         return baseMapper.selectOne(studentQueryWrapper);
+    }
+    @Override
+    public List<Student> getStudentByClazz(String clazz){
+        QueryWrapper<Student> qw = new QueryWrapper<>();//设置查找
+        qw.eq("clazz",clazz);
+        List<Student> list_student=baseMapper.selectList(qw);
+        return list_student;
     }
 }

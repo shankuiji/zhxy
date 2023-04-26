@@ -7,8 +7,17 @@ package com.example.myzhxy.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.myzhxy.pojo.Activity;
+import com.example.myzhxy.pojo.Notificationpub;
+import com.example.myzhxy.pojo.Student;
 import com.example.myzhxy.pojo.Teacher;
+import com.example.myzhxy.pojo.Vo.para_activity;
+import com.example.myzhxy.pojo.Vo.para_notification;
+import com.example.myzhxy.service.ActivityService;
+import com.example.myzhxy.service.NotificationpubService;
+import com.example.myzhxy.service.StudentService;
 import com.example.myzhxy.service.TeacherService;
+import com.example.myzhxy.utils.JwtHelper;
 import com.example.myzhxy.utils.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,6 +25,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +35,16 @@ import java.util.Map;
 public class TeacherController {
     @Autowired
     private TeacherService teacherService;
+
+    @Autowired
+    private NotificationpubService notificationpubService;
+
+    @Autowired
+    private ActivityService activityService;
+
+    @Autowired
+    private StudentService studentService;
+
 
     /** 分页查询教师信息
      * @Param:
@@ -69,5 +89,79 @@ public class TeacherController {
         System.out.println(map.get("ids"));
         teacherService.removeById(map.get("ids"));
         return Result.ok();
+    }
+
+    @ApiOperation("添加通知")
+    @RequestMapping("/addOrUpdateNotification")//这是接口
+    public Result addOrUpdateNotification(@ApiParam("将JSON数据转为Notification对象") @RequestBody para_notification pnotification){//这里我们要接收参数
+        String clazz=pnotification.getReceiver();
+        List<Student> students=studentService.getStudentByClazz(clazz);
+        for(Student student:students){
+            Notificationpub n=new Notificationpub();
+            n.setPublisher(pnotification.getPublisher());
+            n.setReceiver(student.getName());
+            n.setData(pnotification.getData());
+            n.setStatus(0);//设置状态
+            notificationpubService.save(n);
+        }
+        return Result.ok();
+    }
+
+
+    @ApiOperation("教师查看通知")
+    @RequestMapping("/teachergetNotification")
+    public Result teachergetNotification(@ApiParam("token数据") @RequestHeader("token") String token) {
+        //System.out.println(notificationpub);
+        Long userId = JwtHelper.getUserId(token);
+        Integer userType = JwtHelper.getUserType(token);
+        Teacher teacher = teacherService.getTeacherById(userId);//获取教师
+        //现在要查看对应的通知有什么
+        List<Notificationpub> list_notification = notificationpubService.getNotificationpubListByPublisher(teacher.getName());
+        return Result.ok(list_notification);
+    }//这里前端传回的数据应该是和那个getinfo差不多的
+
+    @ApiOperation("添加活动")
+    @RequestMapping("/addOrUpdateActivity")//这是接口
+    public Result addOrUpdateActivity(@ApiParam("将JSON数据转为Activity对象") @RequestBody para_activity pactivity){//这里我们要接收参数
+        String clazz=pactivity.getReceiver();
+        List<Student> students=studentService.getStudentByClazz(clazz);
+        for(Student student:students){
+            Activity a=new Activity();
+            a.setPublisher(pactivity.getPublisher());
+            a.setReceiver(student.getName());
+            a.setName(pactivity.getName());
+            a.setDetail(pactivity.getDetail());
+            a.setStatus(0);//设置状态
+            activityService.save(a);
+        }
+        return Result.ok();
+    }
+
+
+    @ApiOperation("教师查看活动")
+    @RequestMapping("/teachergetActivity")
+    public Result getActivity(@ApiParam("token数据") @RequestHeader("token") String token) {
+        //System.out.println(notificationpub);
+        Long userId = JwtHelper.getUserId(token);
+        Integer userType = JwtHelper.getUserType(token);
+        Teacher teacher = teacherService.getTeacherById(userId);//获取教师
+        //现在要查看对应的活动有什么
+        List<Activity> list_activity = activityService.getActivityListByPublisher(teacher.getName());
+        return Result.ok(list_activity);
+    }//这里前端传回的数据应该是和那个getinfo差不多的
+
+    @ApiOperation("查看活动报名情况")
+    @RequestMapping("/checkActivity")//这是接口
+    public Result checkActivity(@ApiParam("将JSON数据转为Activity对象") @RequestBody Activity activity){//这里我们要接收参数
+        String name=activity.getName();
+        List<Activity> activities=activityService.getActivityListByName(name);
+        List<Student> studentList=new ArrayList<Student>();
+        for(Activity activity1:activities){
+            if (activity1.getStatus()==1){
+                String student_name=activity1.getReceiver();
+                studentList.add(studentService.getStudentByName(student_name));
+            }
+        }
+        return Result.ok(studentList);
     }
 }
