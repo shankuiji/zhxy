@@ -77,7 +77,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
     @Override
     public List<Student> getStudentByClazz(String clazz){
         QueryWrapper<Student> qw = new QueryWrapper<>();//设置查找
-        qw.eq("clazz",clazz);
+        qw.eq("clazz_name",clazz);
         List<Student> list_student=baseMapper.selectList(qw);
         return list_student;
     }

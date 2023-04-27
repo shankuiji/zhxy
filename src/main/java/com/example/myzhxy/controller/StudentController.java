@@ -114,7 +114,7 @@ public class StudentController {
     @RequestMapping("/receiveNotification")
     public Result receiveNotification(@ApiParam("将JSON数据转为Notificationpub对象") @RequestBody Notificationpub notification) {
         notification.setStatus(1);
-        notificationpubService.save(notification);
+        notificationpubService.saveOrUpdate(notification);
         return Result.ok();
     }
 

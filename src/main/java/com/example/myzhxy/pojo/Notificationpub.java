@@ -15,9 +15,13 @@ import lombok.NoArgsConstructor;
 public class Notificationpub {
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
-    private String publisher;//发布者
-    private String receiver;//接收者（为某位学生）
-    private String data;//通知内容
-    private Integer status;//查阅状态  0 ：未读 1：已读
-}
 
+    private String publisher;
+
+    private String receiver;
+
+    private String data;
+
+    private Integer status;
+    //0 ：未读 1：已读
+}

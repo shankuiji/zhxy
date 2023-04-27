@@ -25,9 +25,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Api(tags = "教师控制器")
 @RestController
@@ -107,6 +105,17 @@ public class TeacherController {
         return Result.ok();
     }
 
+    private static ArrayList<Notificationpub> removeDuplicateUser(List<Notificationpub> users) {
+        Set<Notificationpub> set = new TreeSet<Notificationpub>(new Comparator<Notificationpub>() {
+            @Override
+            public int compare(Notificationpub o1, Notificationpub o2) {
+                // 字符串,则按照asicc码升序排列
+                return (o1.getPublisher()+o1.getData()).compareTo(o2.getPublisher()+o2.getData());
+            }
+        });
+        set.addAll(users);
+        return new ArrayList<Notificationpub>(set);
+    }
 
     @ApiOperation("教师查看通知")
     @RequestMapping("/teachergetNotification")
@@ -117,6 +126,7 @@ public class TeacherController {
         Teacher teacher = teacherService.getTeacherById(userId);//获取教师
         //现在要查看对应的通知有什么
         List<Notificationpub> list_notification = notificationpubService.getNotificationpubListByPublisher(teacher.getName());
+        list_notification=removeDuplicateUser(list_notification);
         return Result.ok(list_notification);
     }//这里前端传回的数据应该是和那个getinfo差不多的
 
