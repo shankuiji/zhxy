@@ -11,6 +11,7 @@ import com.example.myzhxy.pojo.Activity;
 import com.example.myzhxy.pojo.Notificationpub;
 import com.example.myzhxy.pojo.Student;
 import com.example.myzhxy.pojo.Teacher;
+import com.example.myzhxy.pojo.Vo.getActivityVo;
 import com.example.myzhxy.pojo.Vo.para_activity;
 import com.example.myzhxy.pojo.Vo.para_notification;
 import com.example.myzhxy.service.ActivityService;
@@ -147,7 +148,17 @@ public class TeacherController {
         return Result.ok();
     }
 
-
+    private static ArrayList<Activity> removeDuplicateActivity(List<Activity> users) {
+        Set<Activity> set = new TreeSet<Activity>(new Comparator<Activity>() {
+            @Override
+            public int compare(Activity o1, Activity o2) {
+                // 字符串,则按照asicc码升序排列
+                return (o1.getPublisher()+o1.getDetail()).compareTo(o2.getPublisher()+o2.getDetail());
+            }
+        });
+        set.addAll(users);
+        return new ArrayList<Activity>(set);
+    }
     @ApiOperation("教师查看活动")
     @RequestMapping("/teachergetActivity")
     public Result getActivity(@ApiParam("token数据") @RequestHeader("token") String token) {
@@ -155,15 +166,17 @@ public class TeacherController {
         Long userId = JwtHelper.getUserId(token);
         Integer userType = JwtHelper.getUserType(token);
         Teacher teacher = teacherService.getTeacherById(userId);//获取教师
+        System.out.println(teacher);
         //现在要查看对应的活动有什么
         List<Activity> list_activity = activityService.getActivityListByPublisher(teacher.getName());
+        list_activity=removeDuplicateActivity(list_activity);
         return Result.ok(list_activity);
     }//这里前端传回的数据应该是和那个getinfo差不多的
 
     @ApiOperation("查看活动报名情况")
     @RequestMapping("/checkActivity")//这是接口
-    public Result checkActivity(@ApiParam("将JSON数据转为Activity对象") @RequestBody Activity activity){//这里我们要接收参数
-        String name=activity.getName();
+    public Result checkActivity(@ApiParam("将JSON数据转为Activity对象") @RequestBody getActivityVo activityVo){//这里我们要接收参数
+        String name=activityVo.getName();
         List<Activity> activities=activityService.getActivityListByName(name);
         List<Student> studentList=new ArrayList<Student>();
         for(Activity activity1:activities){

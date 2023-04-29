@@ -18,8 +18,9 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -118,6 +119,9 @@ public class StudentController {
         return Result.ok();
     }
 
+
+
+
     @ApiOperation("查看活动")
     @RequestMapping("/getActivity")
     public Result getActivity(@ApiParam("token数据") @RequestHeader("token") String token) {
@@ -127,14 +131,22 @@ public class StudentController {
         Student student = studentService.getStudentById(userId);//获取学生
         //现在要查看对应的活动有什么
         List<Activity> list_activity = activityService.getActivityListByReceiver(student.getName());
+        //list_activity=removeDuplicateUser(list_activity);
         return Result.ok(list_activity);
     }//这里前端传回的数据应该是和那个getinfo差不多的
 
     @ApiOperation("确认参加活动")
     @RequestMapping("/joinActivity")
     public Result joinActivity(@ApiParam("将JSON数据转为Activity对象") @RequestBody Activity activity) {
-        activity.setStatus(1);
-        activityService.save(activity);
+        if(activity.getStatus()==1){
+            activity.setStatus(0);
+            activityService.saveOrUpdate(activity);
+        }
+        else{
+            activity.setStatus(1);
+            activityService.saveOrUpdate(activity);
+        }
+
         return Result.ok();
     }
 }
