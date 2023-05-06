@@ -169,7 +169,7 @@ public class SystemController {
      * @Param:
      * @Return:
      */
-    // TODO: 2022/10/11 获取验证码图片
+    // TODO:获取验证码图片
     @ApiOperation("获取验证码图片")
     @GetMapping("/getVerifiCodeImage")
     public void getVerifiCodeImage(HttpServletRequest request, HttpServletResponse response) {

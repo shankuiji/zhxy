@@ -7,20 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**  班级实体类
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("tb_clazz")
-public class Clazz {
+@TableName("tb_score")  //学生成绩表
+public class Score {
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
+    private String sno;
     private String name;
-    private Integer number;
-    private String introducation;
-    private String headmaster;
-    private String email;
-    private String telephone;
-    private String gradeName;
+    private String course;
+    private String score;
 }

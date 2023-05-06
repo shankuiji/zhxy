@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.myzhxy.pojo.Activity;
 import com.example.myzhxy.pojo.Notificationpub;
+import com.example.myzhxy.pojo.Score;
 import com.example.myzhxy.pojo.Student;
 import com.example.myzhxy.service.ActivityService;
 import com.example.myzhxy.service.NotificationpubService;
+import com.example.myzhxy.service.ScoreService;
 import com.example.myzhxy.service.StudentService;
 import com.example.myzhxy.utils.JwtHelper;
 import com.example.myzhxy.utils.MD5;
@@ -44,6 +46,9 @@ public class StudentController {
     @Autowired
     private ActivityService activityService;
 
+    @Autowired
+    private ScoreService scoreService;
+
     /**
      * 分页查询学生信息
      *
@@ -54,7 +59,7 @@ public class StudentController {
     @GetMapping("/getStudentByOpr/{pageNo}/{pageSize}")
     public Result getStudentByOpr(@ApiParam("页码数") @PathVariable("pageNo") Integer pageNo,
                                   @ApiParam("页大小") @PathVariable("pageSize") Integer pageSize,
-                                  Student student) {
+                                  Student student) {//传给了这个student
         Page<Student> studentPage = new Page<>(pageNo, pageSize);
         IPage<Student> iPage = studentService.getStudentByOpr(student, studentPage);
         return Result.ok(iPage);
@@ -148,5 +153,16 @@ public class StudentController {
         }
 
         return Result.ok();
+    }
+
+    @ApiOperation("查看成绩信息")
+    @RequestMapping("/getselfScores")
+    public Result getselfScores(@ApiParam("token数据") @RequestHeader("token") String token) {
+        Long userId = JwtHelper.getUserId(token);
+        Integer userType = JwtHelper.getUserType(token);
+        Student student = studentService.getStudentById(userId);//获取学生
+        //现在要查看对应的成绩信息
+        List<Score> list_score = scoreService.getScoreByname(student.getName());
+        return Result.ok(list_score);
     }
 }
